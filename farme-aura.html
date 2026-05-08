@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Farme Aura! v1.7</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #0f0f1a;
+    --bg3: #13131f;
+    --panel: #16162a;
+    --border: #2a2a4a;
+    --accent: #7c3aed;
+    --accent2: #a855f7;
+    --gold: #f59e0b;
+    --red: #ef4444;
+    --green: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --glow: rgba(124, 58, 237, 0.4);
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* STARS BACKGROUND */
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(124,58,237,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.06) 0%, transparent 50%);
+  }
+
+  .stars::before {
+    content: '';
+    position: absolute;
+    width: 2px; height: 2px;
+    background: white;
+    border-radius: 50%;
+    box-shadow:
+      120px 30px white, 400px 80px white, 650px 20px white, 900px 60px white, 1100px 40px white,
+      200px 150px rgba(255,255,255,0.5), 500px 200px white, 750px 170px rgba(255,255,255,0.6),
+      300px 300px white, 600px 350px rgba(255,255,255,0.4), 850px 320px white, 1050px 280px white,
+      150px 450px rgba(255,255,255,0.5), 450px 500px white, 700px 460px rgba(255,255,255,0.7),
+      100px 600px white, 350px 650px rgba(255,255,255,0.4), 800px 600px white, 1150px 580px white,
+      250px 750px rgba(255,255,255,0.6), 550px 780px white, 950px 730px rgba(255,255,255,0.5);
+  }
+
+  /* SCREENS */
+  .screen {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+
+  .screen.active { display: flex; }
+
+  /* LOGO */
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    text-align: center;
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 40%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    filter: drop-shadow(0 0 30px rgba(168,85,247,0.5));
+    margin-bottom: 0.25rem;
+  }
+
+  .logo-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-align: center;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+
+  /* PANEL */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 0 40px rgba(124,58,237,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+  }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--accent2);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn:hover::before { opacity: 0.15; }
+  .btn:hover { box-shadow: 0 0 20px var(--glow); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  .btn-primary:hover { background: var(--accent2); box-shadow: 0 0 30px var(--glow); }
+
+  .btn-full { width: 100%; margin-top: 0.75rem; }
+
+  /* INPUT */
+  .input-label {
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 1.25rem;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  }
+
+  input[type="number"] {
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  /* DIFFICULTY SELECTION */
+  .diff-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .diff-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diff-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .diff-btn:hover { border-color: var(--accent); transform: translateX(4px); }
+  .diff-btn:hover::before { opacity: 1; }
+
+  .diff-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .diff-tag {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  .diff-aura {
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+
+  .diff-0 .diff-name { color: #64748b; }
+  .diff-1 .diff-name { color: #10b981; }
+  .diff-2 .diff-name { color: #f59e0b; }
+  .diff-3 .diff-name { color: #ef4444; }
+  .diff-4 .diff-name { color: #a855f7; }
+  .diff-5 .diff-name { color: #ff6b6b; text-shadow: 0 0 10px rgba(255,107,107,0.5); }
+
+  /* GAME SCREEN */
+  #screen-game {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+    justify-content: stretch;
+    min-height: 100vh;
+  }
+
+  .game-sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #a855f7, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    letter-spacing: 2px;
+  }
+
+  .rank-title {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .rank-list {
+    list-style: none;
+    flex: 1;
+  }
+
+  .rank-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(42,42,74,0.5);
+    font-size: 0.75rem;
+  }
+
+  .rank-pos {
+    width: 18px;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem;
+  }
+
+  .rank-pos.gold { color: #f59e0b; }
+  .rank-pos.silver { color: #94a3b8; }
+  .rank-pos.bronze { color: #cd7c4b; }
+
+  .rank-name { flex: 1; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rank-name.is-player { color: var(--accent2); font-weight: bold; }
+  .rank-aura { color: var(--gold); font-size: 0.7rem; }
+
+  .aura-display {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  .aura-label {
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+
+  .aura-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(245,158,11,0.4);
+  }
+
+  .aura-name-tag {
+    font-size: 0.65rem;
+    color: var(--accent2);
+    margin-top: 2px;
+    letter-spacing: 1px;
+  }
+
+  /* GAME MAIN */
+  .game-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .level-badge {
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 20px;
+    padding: 4px 16px;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-bar {
+    width: 100%;
+    max-width: 500px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .operation-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem 4rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 40px rgba(124,58,237,0.1);
+    position: relative;
+    overflow: hidden;
+    min-width: 380px;
+  }
+
+  .operation-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .operation-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 4px;
+  }
+
+  .op-counter {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .answer-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .answer-row input {
+    flex: 1;
+    margin-bottom: 0;
+  }
+
+  .answer-row .btn {
+    flex-shrink: 0;
+    padding: 14px 20px;
+    font-size: 0.75rem;
+  }
+
+  /* FEEDBACK */
+  .feedback {
+    height: 28px;
+    text-align: center;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    margin-top: 0.75rem;
+    font-family: 'Orbitron', sans-serif;
+    transition: opacity 0.3s;
+  }
+
+  .feedback.correct { color: var(--green); }
+  .feedback.wrong { color: var(--red); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.hidden { display: none; }
+
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+  }
+
+  .modal-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-title.win { color: var(--gold); text-shadow: 0 0 20px rgba(245,158,11,0.4); }
+  .modal-title.lose { color: var(--red); }
+
+  .modal-msg {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .modal-aura {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--gold);
+    margin-bottom: 0.25rem;
+  }
+
+  .modal-aura-label {
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 1.25rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+  }
+
+  footer p {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    line-height: 1.8;
+  }
+
+  footer span { color: var(--accent2); }
+
+  /* AURA TIER LABEL */
+  .tier-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 768px) {
+    #screen-game { flex-direction: column; }
+    .game-sidebar { width: 100%; min-height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; gap: 1rem; align-items: center; }
+    .sidebar-logo { margin-bottom: 0; }
+    .rank-list { display: flex; gap: 0.5rem; flex: none; }
+    .rank-item { border: none; }
+    .aura-display { margin-top: 0; padding: 0.5rem 1rem; }
+    .operation-card { padding: 2rem 1.5rem; min-width: unset; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<!-- SCREEN: HOME -->
+<div id="screen-home" class="screen active">
+  <div class="logo">Farme Aura!</div>
+  <div class="logo-sub">The Math Aura Challenge</div>
+  <div class="panel" style="text-align:center;">
+    <p style="font-size:0.8rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:1.5rem;">Prove seu valor. Acumule Aura.</p>
+    <button class="btn btn-primary" onclick="goToUsername()" style="width:100%; font-size:1rem; padding:18px;">⚡ JOGAR</button>
+  </div>
+</div>
+
+<!-- SCREEN: USERNAME -->
+<div id="screen-username" class="screen">
+  <div class="logo" style="font-size:2rem; margin-bottom:0.5rem;">Farme Aura!</div>
+  <div class="logo-sub">Identifique-se, guerreiro</div>
+  <div class="panel">
+    <label class="input-label">Coloque o seu nome de usuário</label>
+    <input type="text" id="username-input" placeholder="Digite seu nome..." maxlength="20" onkeydown="if(event.key==='Enter')confirmUsername()">
+    <button class="btn btn-primary btn-full" onclick="confirmUsername()">OK →</button>
+  </div>
+</div>
+
+<!-- SCREEN: DIFFICULTY -->
+<div id="screen-difficulty" class="screen">
+  <div class="logo" style="font-size:2rem; margin-bottom:0.25rem;">Selecione a Dificuldade</div>
+  <div class="logo-sub" style="margin-bottom:1.5rem;">Escolha com sabedoria</div>
+  <div class="diff-grid">
+    <div class="diff-btn diff-0" onclick="startGame(0)">
+      <div><div class="diff-name">Super Fácil</div><div class="diff-tag">Só para os betinhas</div></div>
+      <div class="diff-aura">+50 AURA/OP</div>
+    </div>
+    <div class="diff-btn diff-1" onclick="startGame(1)">
+      <div><div class="diff-name">Fácil</div><div class="diff-tag">Para iniciantes</div></div>
+      <div class="diff-aura">+150 AURA/OP</div>
+    </div>
+    <div class="diff-btn diff-2" onclick="startGame(2)">
+      <div><div class="diff-name">Difícil</div><div class="diff-tag">Desafiador</div></div>
+      <div class="diff-aura">+400 AURA/OP</div>
+    </div>
+    <div class="diff-btn diff-3" onclick="startGame(3)">
+      <div><div class="diff-name">Hardcore</div><div class="diff-tag">Recomendado para o 5ANO</div></div>
+      <div class="diff-aura">+1000 AURA/OP</div>
+    </div>
+    <div class="diff-btn diff-4" onclick="startGame(4)">
+      <div><div class="diff-name">Elite</div><div class="diff-tag">Apenas os melhores</div></div>
+      <div class="diff-aura">+3000 AURA/OP</div>
+    </div>
+    <div class="diff-btn diff-5" onclick="startGame(5)">
+      <div><div class="diff-name">🔥 Hell Mode</div><div class="diff-tag">Você vai chorar</div></div>
+      <div class="diff-aura">+10000 AURA/OP</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: GAME -->
+<div id="screen-game" class="screen">
+  <div class="stars"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="game-sidebar">
+    <div class="sidebar-logo">⚡ Farme Aura!</div>
+    <div class="rank-title">🏆 Ranking de Aura</div>
+    <ul class="rank-list" id="rank-list">
+    </ul>
+    <div class="aura-display">
+      <div class="aura-label">Sua Aura</div>
+      <div class="aura-value" id="sidebar-aura">0</div>
+      <div class="aura-name-tag" id="sidebar-name">-</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="game-main">
+    <div class="level-badge" id="level-badge">NÍVEL 1 — SUPER FÁCIL</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="op-counter" id="op-counter">OPERAÇÃO 1 / 10</div>
+    <div class="operation-card">
+      <div class="operation-text" id="operation-display">2 + 3 = ?</div>
+    </div>
+    <div class="answer-row">
+      <input type="number" id="answer-input" placeholder="?" onkeydown="if(event.key==='Enter')checkAnswer()">
+      <button class="btn btn-primary" onclick="checkAnswer()">✓</button>
+    </div>
+    <div class="feedback" id="feedback"></div>
+  </main>
+</div>
+
+<!-- MODAL: LEVEL UP -->
+<div class="modal-overlay hidden" id="modal-levelup">
+  <div class="modal">
+    <div class="modal-title win" id="modal-lu-title">NÍVEL COMPLETO!</div>
+    <div class="modal-msg" id="modal-lu-msg">Você completou o nível. Continue avançando!</div>
+    <div class="modal-aura" id="modal-lu-aura">+5000</div>
+    <div class="modal-aura-label">AURA ACUMULADA</div>
+    <button class="btn btn-primary btn-full" id="modal-lu-btn" onclick="nextLevel()">PRÓXIMO NÍVEL →</button>
+    <button class="btn btn-full" style="margin-top:0.5rem" onclick="goHome()">VOLTAR AO INÍCIO</button>
+  </div>
+</div>
+
+<!-- MODAL: WIN -->
+<div class="modal-overlay hidden" id="modal-win">
+  <div class="modal">
+    <div class="modal-title win">🔥 LENDÁRIO!</div>
+    <div class="modal-msg">Você completou TODOS os níveis. Sua Aura transcendeu os limites da realidade.</div>
+    <div class="modal-aura" id="modal-win-aura">0</div>
+    <div class="modal-aura-label">AURA TOTAL ACUMULADA</div>
+    <button class="btn btn-primary btn-full" onclick="goHome()">VOLTAR AO INÍCIO</button>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Vicente Bajay — todos os direitos reservados</p>
+  <p>Site desenvolvido por Vicente Bajay ViquinhoDev | <span>Farme Aura! v1.7</span></p>
+</footer>
+
+<script>
+const OPERATIONS_DATA = {
+  "levels": [
+    {
+      "id": 0, "name": "Super Fácil", "subtitle": "Só para os betinhas", "aura": 50,
+      "operations": [
+        {"a":2,"b":3,"op":"+"}, {"a":5,"b":1,"op":"+"}, {"a":4,"b":4,"op":"+"},
+        {"a":7,"b":2,"op":"+"}, {"a":3,"b":3,"op":"+"}, {"a":9,"b":1,"op":"+"},
+        {"a":6,"b":2,"op":"+"}, {"a":8,"b":1,"op":"+"}, {"a":5,"b":4,"op":"+"},
+        {"a":10,"b":5,"op":"+"}
+      ]
+    },
+    {
+      "id": 1, "name": "Fácil", "subtitle": "", "aura": 150,
+      "operations": [
+        {"a":12,"b":8,"op":"+"}, {"a":15,"b":7,"op":"-"}, {"a":6,"b":4,"op":"*"},
+        {"a":20,"b":4,"op":"/"}, {"a":13,"b":9,"op":"+"}, {"a":25,"b":12,"op":"-"},
+        {"a":5,"b":6,"op":"*"}, {"a":18,"b":3,"op":"/"}, {"a":14,"b":11,"op":"+"},
+        {"a":30,"b":6,"op":"/"}
+      ]
+    },
+    {
+      "id": 2, "name": "Difícil", "subtitle": "", "aura": 400,
+      "operations": [
+        {"a":47,"b":38,"op":"+"}, {"a":83,"b":47,"op":"-"}, {"a":12,"b":13,"op":"*"},
+        {"a":144,"b":12,"op":"/"}, {"a":67,"b":58,"op":"+"}, {"a":15,"b":14,"op":"*"},
+        {"a":196,"b":14,"op":"/"}, {"a":125,"b":78,"op":"-"}, {"a":19,"b":17,"op":"*"},
+        {"a":256,"b":16,"op":"/"}
+      ]
+    },
+    {
+      "id": 3, "name": "Hardcore", "subtitle": "Recomendado para o 5ANO", "aura": 1000,
+      "operations": [
+        {"a":347,"b":289,"op":"+"}, {"a":512,"b":347,"op":"-"}, {"a":23,"b":17,"op":"*"},
+        {"a":625,"b":25,"op":"/"}, {"a":29,"b":31,"op":"*"}, {"a":784,"b":28,"op":"/"},
+        {"a":987,"b":654,"op":"-"}, {"a":37,"b":43,"op":"*"}, {"a":1296,"b":36,"op":"/"},
+        {"a":1487,"b":896,"op":"+"}
+      ]
+    },
+    {
+      "id": 4, "name": "Elite", "subtitle": "", "aura": 3000,
+      "operations": [
+        {"a":47,"b":2,"op":"^"}, {"a":2197,"b":3,"op":"root"}, {"a":123,"b":456,"op":"*"},
+        {"a":9801,"b":99,"op":"/"}, {"a":63,"b":2,"op":"^"}, {"a":15625,"b":3,"op":"root"},
+        {"a":789,"b":321,"op":"*"}, {"a":53,"b":2,"op":"^"}, {"a":32768,"b":5,"op":"root"},
+        {"a":4913,"b":17,"op":"/"}
+      ]
+    },
+    {
+      "id": 5, "name": "Hell Mode", "subtitle": "", "aura": 10000,
+      "operations": [
+        {"a":2,"b":10,"op":"^"}, {"a":1000000,"b":6,"op":"root"}, {"a":9999,"b":9999,"op":"*"},
+        {"a":2,"b":16,"op":"^"}, {"a":16777216,"b":8,"op":"root"}, {"a":7777,"b":7777,"op":"*"},
+        {"a":3,"b":12,"op":"^"}, {"a":1594323,"b":13,"op":"root"}, {"a":99999,"b":99999,"op":"*"},
+        {"a":2,"b":20,"op":"^"}
+      ]
+    }
+  ]
+};
+
+let state = {
+  username: '',
+  currentLevel: 0,
+  startLevel: 0,
+  opIndex: 0,
+  aura: 0,
+  leaderboard: []
+};
+
+const TIER_NAMES = [
+  {min:0, name:'Sem Aura', color:'#64748b'},
+  {min:100, name:'Aprendiz', color:'#10b981'},
+  {min:500, name:'Guerreiro', color:'#3b82f6'},
+  {min:2000, name:'Mestre', color:'#8b5cf6'},
+  {min:5000, name:'Lenda', color:'#f59e0b'},
+  {min:15000, name:'Deus da Aura', color:'#ef4444'},
+  {min:50000, name:'TRANSCENDENTE', color:'#ff6b6b'},
+];
+
+function getTier(aura) {
+  let tier = TIER_NAMES[0];
+  for (const t of TIER_NAMES) { if (aura >= t.min) tier = t; }
+  return tier;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goToUsername() { showScreen('screen-username'); setTimeout(()=>document.getElementById('username-input').focus(),200); }
+
+function confirmUsername() {
+  const val = document.getElementById('username-input').value.trim();
+  if (!val) { document.getElementById('username-input').style.borderColor='var(--red)'; return; }
+  state.username = val;
+  showScreen('screen-difficulty');
+}
+
+function startGame(levelId) {
+  state.currentLevel = levelId;
+  state.startLevel = levelId;
+  state.opIndex = 0;
+  if (!state.aura) state.aura = 0;
+  loadLevel();
+  showScreen('screen-game');
+  renderLeaderboard();
+}
+
+function opSymbol(op) {
+  return {'+':'+', '-':'−', '*':'×', '/':'÷', '^':'^', 'root':'ⁿ√'}[op] || op;
+}
+
+function formatOperation(op) {
+  const {a, b, op:type} = op;
+  if (type === '^') return `${a} ^ ${b} = ?`;
+  if (type === 'root') return `${b}√${a} = ?`;
+  return `${a} ${opSymbol(type)} ${b} = ?`;
+}
+
+function computeAnswer(op) {
+  const {a, b, op:type} = op;
+  if (type === '+') return a + b;
+  if (type === '-') return a - b;
+  if (type === '*') return a * b;
+  if (type === '/') return a / b;
+  if (type === '^') return Math.pow(a, b);
+  if (type === 'root') return Math.round(Math.pow(a, 1/b));
+  return 0;
+}
+
+function loadLevel() {
+  const level = OPERATIONS_DATA.levels[state.currentLevel];
+  const op = level.operations[state.opIndex];
+  document.getElementById('level-badge').textContent = `NÍVEL ${state.currentLevel + 1} — ${level.name.toUpperCase()}`;
+  document.getElementById('operation-display').textContent = formatOperation(op);
+  document.getElementById('op-counter').textContent = `OPERAÇÃO ${state.opIndex + 1} / ${level.operations.length}`;
+  const pct = (state.opIndex / level.operations.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('answer-input').value = '';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  updateSidebarAura();
+  setTimeout(() => document.getElementById('answer-input').focus(), 100);
+}
+
+function checkAnswer() {
+  const level = OPERATIONS_DATA.levels[state.currentLevel];
+  const op = level.operations[state.opIndex];
+  const correct = computeAnswer(op);
+  const userVal = parseFloat(document.getElementById('answer-input').value);
+
+  if (isNaN(userVal)) {
+    showFeedback('Digite um número!', 'wrong');
+    return;
+  }
+
+  const tolerance = (op.op === '/') ? 0.01 : 0;
+  if (Math.abs(userVal - correct) <= tolerance || Math.round(userVal) === Math.round(correct)) {
+    state.aura += level.aura;
+    updateSidebarAura();
+    showFeedback(`+${level.aura} AURA ✓`, 'correct');
+    setTimeout(advanceOp, 700);
+  } else {
+    showFeedback(`ERRADO! Era ${Math.round(correct * 100)/100}`, 'wrong');
+    setTimeout(() => {
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-input').focus();
+      document.getElementById('feedback').textContent = '';
+    }, 1200);
+  }
+}
+
+function showFeedback(msg, type) {
+  const el = document.getElementById('feedback');
+  el.textContent = msg;
+  el.className = 'feedback ' + type;
+}
+
+function advanceOp() {
+  const level = OPERATIONS_DATA.levels[state.currentLevel];
+  state.opIndex++;
+  if (state.opIndex >= level.operations.length) {
+    levelComplete();
+  } else {
+    loadLevel();
+  }
+}
+
+function levelComplete() {
+  updateLeaderboard();
+  const nextLevelId = state.currentLevel + 1;
+  const isLast = nextLevelId >= OPERATIONS_DATA.levels.length;
+
+  if (isLast) {
+    document.getElementById('modal-win-aura').textContent = state.aura.toLocaleString();
+    document.getElementById('modal-win').classList.remove('hidden');
+  } else {
+    const nextLevel = OPERATIONS_DATA.levels[nextLevelId];
+    document.getElementById('modal-lu-title').textContent = '🎯 NÍVEL COMPLETO!';
+    document.getElementById('modal-lu-msg').textContent = `Parabéns! Próximo: ${nextLevel.name}${nextLevel.subtitle ? ' — ' + nextLevel.subtitle : ''}`;
+    document.getElementById('modal-lu-aura').textContent = state.aura.toLocaleString() + ' AURA';
+    document.getElementById('modal-levelup').classList.remove('hidden');
+  }
+}
+
+function nextLevel() {
+  document.getElementById('modal-levelup').classList.add('hidden');
+  state.currentLevel++;
+  state.opIndex = 0;
+  loadLevel();
+  renderLeaderboard();
+}
+
+function goHome() {
+  document.getElementById('modal-levelup').classList.add('hidden');
+  document.getElementById('modal-win').classList.add('hidden');
+  updateLeaderboard();
+  state.aura = 0;
+  showScreen('screen-home');
+}
+
+function updateLeaderboard() {
+  const existing = state.leaderboard.find(e => e.name === state.username);
+  if (existing) {
+    if (state.aura > existing.aura) existing.aura = state.aura;
+  } else {
+    state.leaderboard.push({ name: state.username, aura: state.aura });
+  }
+  state.leaderboard.sort((a,b) => b.aura - a.aura);
+  if (state.leaderboard.length > 10) state.leaderboard = state.leaderboard.slice(0,10);
+  try { localStorage.setItem('farmeaura_lb', JSON.stringify(state.leaderboard)); } catch(e) {}
+}
+
+function updateSidebarAura() {
+  document.getElementById('sidebar-aura').textContent = state.aura.toLocaleString();
+  document.getElementById('sidebar-name').textContent = state.username;
+}
+
+function renderLeaderboard() {
+  updateLeaderboard();
+  const list = document.getElementById('rank-list');
+  list.innerHTML = '';
+
+  const posClasses = ['gold','silver','bronze'];
+  const posSymbols = ['#1','#2','#3'];
+
+  if (state.leaderboard.length === 0) {
+    list.innerHTML = '<li class="rank-item" style="color:var(--muted);font-size:0.7rem">Nenhum ranking ainda</li>';
+    return;
+  }
+
+  state.leaderboard.forEach((entry, i) => {
+    const isPlayer = entry.name === state.username;
+    const tier = getTier(entry.aura);
+    const li = document.createElement('li');
+    li.className = 'rank-item';
+    li.innerHTML = `
+      <span class="rank-pos ${posClasses[i] || ''}">${posSymbols[i] || '#'+(i+1)}</span>
+      <span class="rank-name ${isPlayer ? 'is-player' : ''}">${entry.name}</span>
+      <span class="rank-aura">${entry.aura.toLocaleString()}</span>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// Load saved leaderboard
+try {
+  const saved = localStorage.getItem('farmeaura_lb');
+  if (saved) state.leaderboard = JSON.parse(saved);
+} catch(e) {}
+</script>
+</body>
+</html>
